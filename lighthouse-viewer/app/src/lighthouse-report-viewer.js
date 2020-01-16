@@ -48,6 +48,7 @@ class LighthouseReportViewer {
 
     this._addEventListeners();
     this._loadFromDeepLink();
+    this._loadFromJSON();
     this._listenForMessages();
   }
 
@@ -426,6 +427,33 @@ class LighthouseReportViewer {
     const placeholder = document.querySelector('.viewer-placeholder-inner');
     if (placeholder) placeholder.classList.toggle('lh-loading', force);
   }
+
+  /**
+   * Attempts to pull gist id from URL and render report from it.
+   * @return {Promise<void>}
+   * @private
+   */
+  _loadFromJSON() {
+    let loadPromise = Promise.resolve();
+
+    // Try paste as json content.
+    if(FOLSOM_JSON_REPORT){
+      try {
+        //const json = JSON.parse(FOLSOM_JSON_REPORT);
+        const json = FOLSOM_JSON_REPORT;
+        this._replaceReportHtml(json);
+
+        if (window.ga) {
+          window.ga('send', 'event', 'report', 'paste');
+        }
+      } catch (err) {
+        logger.error(err.message);
+      }
+    }
+
+    return loadPromise.finally(() => this._toggleLoadingBlur(false));
+  }
+
 }
 
 // node export for testing.
